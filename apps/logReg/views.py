@@ -22,8 +22,6 @@ def process(request):
             for val in err_msg:
                 messages.add_message(request, messages.INFO, val)
             return redirect('/')
-
-
 def log_in(request):
     if request.method == 'GET':
         return redirect('/')
@@ -41,6 +39,7 @@ def log_in(request):
             return redirect('/')
 def success(request):
     if 'id' not in request.session:
+        messages.add_message(request, messages.INFO, "Must be logged in")
         return redirect('/')
     else:
         context = {
@@ -48,5 +47,8 @@ def success(request):
         }
         return render(request, 'logReg/success.html', context)
 def log_out(request):
-    del request.session['id']
+    request.session.flush()
+    return redirect('/')
+def error(request):
+    messages.add_message(request, messages.INFO, "Page does not exist")
     return redirect('/')

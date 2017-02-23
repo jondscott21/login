@@ -5,7 +5,7 @@ from time import time, strftime, localtime
 import re, bcrypt
 EMAIL_REGEX = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 PASSWORD_REGEX = re.compile(r'((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,})', re.MULTILINE)
-name_regex = re.compile(r'[a-zA-Z]+', re.MULTILINE)
+name_regex = re.compile(r'[a-zA-Z]+$', re.MULTILINE)
 
 # Create your models here.
 class Umanager(models.Manager):
@@ -58,14 +58,14 @@ class Umanager(models.Manager):
         if len(email) < 1 or len(password) < 1:
             msg.append("Login fields cannot be blank.")
         else:
-            user_info = User.objects.filter(email=email)[0]
+            user_info = User.objects.filter(email=email)
             if not user_info:
                 msg.append("Invalid user. Please Register")
-            elif not bcrypt.checkpw(password.encode(), user_info.password.encode()):
-                msg.append("Invalid user. Please Register")
-                return User.objects.filter(email=email)[0].id
+            elif not bcrypt.checkpw(password.encode(), user_info[0].password.encode()):
+                msg.append("Invalid password. Please Register")
         if not msg:
             valid = True
+            status.update({'user_id': user_info[0].id})
         else:
             valid = False
             status.update({'msg': msg})
