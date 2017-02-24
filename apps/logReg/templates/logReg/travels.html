@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="">
+    <title>travels</title>
+</head>
+<body>
+<h1>Welcome {{ users.first }} {{ users.last }}</h1>
+{% if messages %}
+    {% for message in messages %}
+    <h3>{{ message }}</h3>
+    {% endfor %}
+{% endif %}
+
+<form action="/log_out">
+    <input type="submit" value="Log out">
+</form>
+<h4>Your trip schedule</h4>
+<table>
+
+    <tr>
+        <th>Destination</th>
+        <th>Travel Start Date</th>
+        <th>Travel End Date</th>
+        <th>Do You Want To Join</th>
+    </tr>
+    {% for trip in trips %}
+        {% if request.session.id == trip.user_id %}
+        <tr>
+            <td><a href="/destination">{{ trip.destination }}</a></td>
+            <td>{{ trip.travel_start }}</td>
+            <td>{{ trip.travel_end }}</td>
+            <td>{{ trip.description }}</td>
+            <td><a href="/destination/{{ trip.id }}">Join</a></td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+     {% for trip in trips %}
+        {% if request.session.id != trip.user_id %}
+        <tr>
+            <td><a href="/destination">{{ trip.destination }}</a></td>
+            <td>{{ trip.travel_start }}</td>
+            <td>{{ trip.travel_end }}</td>
+            <td>{{ trip.description }}</td>
+            <td><a href="/destination/{{ trip.id }}">Join</a></td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+</table>
+<h4>Other user's travel plans</h4>
+<h4><a href="/add">Add travel plan</a></h4>
+</body>
+</html>

@@ -5,7 +5,7 @@ from time import time, strftime, localtime
 import re, bcrypt
 EMAIL_REGEX = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 PASSWORD_REGEX = re.compile(r'((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,})', re.MULTILINE)
-name_regex = re.compile(r'[a-zA-Z]+$', re.MULTILINE)
+name_regex = re.compile(r'[a-zA-Z]{3,}$', re.MULTILINE)
 
 # Create your models here.
 class Umanager(models.Manager):
@@ -18,8 +18,8 @@ class Umanager(models.Manager):
         password = postData['password']
         confirm = postData['confirm']
         bday = postData['bday']
-        if len(first) < 2 or len(last) < 2:
-            msg.append("Name fields cannot be blank, and must contain least 2 letters")
+        if len(first) < 3 or len(last) < 3:
+            msg.append("Name fields cannot be blank, and must contain least 3 letters")
         elif not name_regex.match(first) or not name_regex.match(last):
             msg.append("Name fields can only contain letters")
         if len(email) < 1:
@@ -71,6 +71,13 @@ class Umanager(models.Manager):
             status.update({'msg': msg})
         status.update({'valid': valid})
         return status
+    def add_trip(self, postData):
+        dest = postData['dest']
+        desc = postData['desc']
+        fdate = postData['date_from']
+        tdate = postData['date_to']
+        return Travel.objects.create(destination=dest, description=desc, travel_start=fdate, travel_end=tdate)
+
 class User(models.Model):
     first = models.CharField(max_length=45)
     last = models.CharField(max_length=45)
@@ -79,4 +86,13 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     bday = models.DateTimeField(auto_now=False, auto_now_add=False, default="9999-11-29")
+    objects = Umanager()
+
+class Travel(models.Model):
+    destination = models.CharField(max_length=45, null=True, blank=True)
+    plan = models.ManyToManyField(User, related_name='user_plan')
+    user = models.ForeignKey(User, related_name='travel', blank=True, null=True)
+    description = models.CharField(max_length=45, null=True, blank=True)
+    travel_start = models.DateTimeField(auto_now=False, auto_now_add=False, default='9999-11-29', null=True, blank=True)
+    travel_end = models.DateTimeField(auto_now=False, auto_now_add=False, default='9999-11-29', null=True, blank=True)
     objects = Umanager()

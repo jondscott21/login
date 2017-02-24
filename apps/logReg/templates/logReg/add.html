@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="">
+    <title>add</title>
+</head>
+<body>
+<h1>Add a trip</h1>
+<form action="/proc_add" method="post">
+    {% csrf_token %}
+    <label for="dest">Destination: </label><input type="text" name="dest" placeholder="Destination">
+    <label for="desc">Description: </label><input type="text" name="desc" placeholder="Description">
+    <label for="trav_from">Travel date from: </label><input type="date" name="date_from">
+    <label for="trav_from">Travel date to: </label><input type="date" name="date_to">
+    <input type="submit" value="Add">
+</form>
+</body>
+</html>
