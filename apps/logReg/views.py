@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponse
-from django.db.models import F
+from django.db.models import F, Count
 from .models import User, Umanager, Poke
 from django.contrib import messages
 def index(request):
@@ -46,13 +46,20 @@ def pokes(request):
         messages.add_message(request, messages.INFO, "Must be logged in")
         return redirect('/')
     else:
-        peoples = User.objects.all().exclude(id=request.session['id'])
-        pokes = Poke.objects.all()
+
+
         user = User.objects.get(id=request.session['id'])
-        pokes = Poke.objects.get(poke_count=peoples)
+        pokes = Poke.objects.all().exclude(pokee=user)
+        poked_list =[]
+        for poke in pokes:
+            poked_list.append(poke.pokee.id)
+        peoples = User.objects.all().exclude(id=request.session['id']).exclude(id__in=poked_list)
+        been_poked = Poke.objects.all().exclude(poker=user).order_by('-poke_count')
+
         context = {
             'peoples': peoples,
             'user': user,
+            'been_poked': been_poked,
             'pokes': pokes
         }
         return render(request, 'logReg/templates/logReg/pokes.html', context)

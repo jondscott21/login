@@ -10,7 +10,13 @@
     <input type="submit" value="Log out">
 </form>
 <h1>Welcome {{ user.name }}</h1>
-<p>people poked you!</p>
+<p>{{ been_poked.count }} people poked you!</p>
+{% for poke in been_poked %}
+    {{ poke.poker.name }} poked you {{ poke.poke_count }} times <br>
+{% endfor %}
+
+
+
 {% if messages %}
     {% for message in messages %}
     <h3>{{ message }}</h3>
@@ -30,19 +36,30 @@
     </tr>
     </thead>
     <tbody>
+    {% for people in pokes %}
+        <tr>
+            <td>{{ people.pokee.name }}</td>
+            <td>{{ people.pokee.alias }}</td>
+            <td>{{ people.pokee.email }}</td>
+            <td>{{ people.poke_count}}</td>
+            <td><form action="/add_poke/{{ people.pokee.id }}" method="post">
+                {% csrf_token %}
+                <input type="submit" name="poke" value="Poke!">
+            </form></td>
+        </tr>
+    {% endfor %}
     {% for people in peoples %}
         <tr>
             <td>{{ people.name }}</td>
             <td>{{ people.alias }}</td>
             <td>{{ people.email }}</td>
-            <td>{{ people.id.pokee.poke_count}}</td>
+            <td>0</td>
             <td><form action="/add_poke/{{ people.id }}" method="post">
                 {% csrf_token %}
                 <input type="submit" name="poke" value="Poke!">
             </form></td>
         </tr>
     {% endfor %}
-    </tbody>
 </table>
 </body>
 </html>
