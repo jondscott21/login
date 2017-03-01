@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, HttpResponse
-from .models import User, Umanager, Travel
+from django.db.models import F
+from .models import User, Umanager, Poke
 from django.contrib import messages
 def index(request):
     if 'id' in request.session:
-        return redirect('/travels')
+        return redirect('/pokes')
     return render(request, 'logReg/index.html')
 def process(request):
     if request.method == 'GET':
@@ -16,12 +17,13 @@ def process(request):
                 new_user = User.objects.filter(email=request.POST['email'])[0]
                 request.session['id'] = new_user.id
                 messages.add_message(request, messages.INFO, 'Registration is successful')
-                return redirect('/travels')
+                return redirect('/pokes')
         else:
             err_msg = user_check['msg']
             for val in err_msg:
                 messages.add_message(request, messages.INFO, val)
             return redirect('/')
+
 def log_in(request):
     if request.method == 'GET':
         return redirect('/')
@@ -31,7 +33,7 @@ def log_in(request):
             if 'id' not in request.session:
                 logged = User.objects.filter(email=request.POST['elog'])[0]
                 request.session['id'] = logged.id
-                return redirect('/travels')
+                return redirect('/pokes')
         else:
             log_err = user_log['msg']
             for val in log_err:
@@ -39,48 +41,41 @@ def log_in(request):
             return redirect('/')
 
 
-def travels(request):
+def pokes(request):
     if 'id' not in request.session:
         messages.add_message(request, messages.INFO, "Must be logged in")
         return redirect('/')
     else:
-        travel = Travel.objects.all()
+        peoples = User.objects.all().exclude(id=request.session['id'])
+        pokes = Poke.objects.all()
         user = User.objects.get(id=request.session['id'])
+        pokes = Poke.objects.get(poke_count=peoples)
         context = {
-            'others': User.objects.exclude(id=request.session['id']),
-            'users': user,
-            'trips': travel,
+            'peoples': peoples,
+            'user': user,
+            'pokes': pokes
         }
-        return render(request, 'logReg/travels.html', context)
+        return render(request, 'logReg/templates/logReg/pokes.html', context)
 
 
-def destination(request, id):
-    context = {
-        'trips'
-        'trip_id': Travel.objects.get(id=id),
-        'users': User.objects.get(id=request.session['id']),
-    }
-
-
-    return render(request, 'logReg/destination.html', context)
-
-
-def add(request):
-    if request.method == 'GET':
-        return render(request, 'logReg/add.html')
-
-
-def proc_add(request):
+def add_poke(request, id):
     if request.method == 'POST':
         user = User.objects.get(id=request.session['id'])
-        Travel.objects.create(destination=request.POST['dest'], description=request.POST['desc'], travel_start=request.POST['date_from'], travel_end=request.POST['date_to'], user=user)
-        Travel.objects.add_trip(request.POST)
-        return redirect('/travels')
+        if Poke.objects.filter(poker_id=user.id, pokee_id=id).exists():
+            counter = Poke.objects.get(poker_id=user.id, pokee_id=id)
+            counter.poke_count = F('poke_count') + 1
+            counter.save()
+            return redirect('/pokes')
+        else:
+            Poke.objects.create(poker_id=user.id, poke_count=1, pokee_id=id)
+        return redirect('/pokes')
 
 
 def log_out(request):
     request.session.flush()
     return redirect('/')
+
+
 def error(request):
     messages.add_message(request, messages.INFO, "Page does not exist")
     return redirect('/')

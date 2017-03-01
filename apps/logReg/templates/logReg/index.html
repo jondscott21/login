@@ -11,6 +11,7 @@
     </style>
 </head>
 <h1>Registration</h1>
+<p>(password should contain at least 1 uppercase letter, 1 number and 8 characters)</p>
 {% if messages %}
     <ul>
     {% for message in messages %}
@@ -21,8 +22,8 @@
 
 <form action="/process" method="post">
     {% csrf_token %}
-    <input type="text" name="first" placeholder="First Name">
-    <input type="text" name="last" placeholder="Last Name">
+    <input type="text" name="name" placeholder="Name">
+    <input type="text" name="alias" placeholder="Alias">
     <input type="text" name="email" placeholder="Email">
     <input type="password" name="password" placeholder="Password">
     <input type="password" name="confirm" placeholder="Confirm Password">

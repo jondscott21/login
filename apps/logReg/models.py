@@ -12,16 +12,16 @@ class Umanager(models.Manager):
     def reg(self, postData):
         status = {}
         msg = []
-        first = postData['first']
-        last = postData['last']
+        name = postData['name']
+        alias = postData['alias']
         email = postData['email']
         password = postData['password']
         confirm = postData['confirm']
         bday = postData['bday']
-        if len(first) < 3 or len(last) < 3:
+        if len(name) < 3 or len(alias) < 3:
             msg.append("Name fields cannot be blank, and must contain least 3 letters")
-        elif not name_regex.match(first) or not name_regex.match(last):
-            msg.append("Name fields can only contain letters")
+        elif not name_regex.match(name):
+            msg.append("Name field can only contain letters")
         if len(email) < 1:
             msg.append("Email fields cannot be blank")
         elif len(User.objects.filter(email=email)) > 0:
@@ -43,7 +43,7 @@ class Umanager(models.Manager):
         if not msg:
             valid = True
             pwhash = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
-            User.objects.create(first=first, last=last, email=email, password=pwhash, bday=bday)
+            User.objects.create(name=name, alias=alias, email=email, password=pwhash, bday=bday)
         else:
             valid = False
         status.update({'valid': valid, 'msg': msg})
@@ -71,16 +71,11 @@ class Umanager(models.Manager):
             status.update({'msg': msg})
         status.update({'valid': valid})
         return status
-    def add_trip(self, postData):
-        dest = postData['dest']
-        desc = postData['desc']
-        fdate = postData['date_from']
-        tdate = postData['date_to']
-        return Travel.objects.create(destination=dest, description=desc, travel_start=fdate, travel_end=tdate)
+
 
 class User(models.Model):
-    first = models.CharField(max_length=45)
-    last = models.CharField(max_length=45)
+    name = models.CharField(max_length=45)
+    alias = models.CharField(max_length=45)
     email = models.EmailField(max_length=45, unique=True)
     password = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -88,11 +83,9 @@ class User(models.Model):
     bday = models.DateTimeField(auto_now=False, auto_now_add=False, default="9999-11-29")
     objects = Umanager()
 
-class Travel(models.Model):
-    destination = models.CharField(max_length=45, null=True, blank=True)
-    plan = models.ManyToManyField(User, related_name='user_plan')
-    user = models.ForeignKey(User, related_name='travel', blank=True, null=True)
-    description = models.CharField(max_length=45, null=True, blank=True)
-    travel_start = models.DateTimeField(auto_now=False, auto_now_add=False, default='9999-11-29', null=True, blank=True)
-    travel_end = models.DateTimeField(auto_now=False, auto_now_add=False, default='9999-11-29', null=True, blank=True)
-    objects = Umanager()
+
+class Poke(models.Model):
+    poker = models.ForeignKey(User, related_name='did_poke')
+    poke_count = models.IntegerField(null=True, blank=True)
+    pokee = models.ForeignKey(User, related_name='was_poked')
+
