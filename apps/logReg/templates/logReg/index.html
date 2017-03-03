@@ -10,7 +10,8 @@
         }
     </style>
 </head>
-<h1>Registration</h1>
+<h1>Welcome!</h1>
+<h3>Registration</h3>
 <p>(password should contain at least 1 uppercase letter, 1 number and 8 characters)</p>
 {% if messages %}
     <ul>
@@ -30,7 +31,7 @@
     <input type="date" name="bday">
     <input type="submit" value="Register">
 </form>
-<h2>Log In</h2>
+<h3>Log In</h3>
 <form action="/log_in" method="post">
     {% csrf_token %}
     <input type="text" name="elog" placeholder="Email">

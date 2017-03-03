@@ -10,7 +10,7 @@ def destination(request, id):
         'users': User.objects.get(id=request.session['id']),
         'location': location,
     }
-    return render(request, 'logReg/destination.html', context)
+    return render(request, 'logReg/users.html', context)
 
 
 def add(request):
@@ -68,3 +68,48 @@ tp = TravelPlan.objects.all()
 </table>
 <h4><a href="/add">Add travel plan</a></h4>
 
+
+<h4>People you may want to poke:</h4>
+<table>
+<thead>
+    <tr>
+        <th>Name</th>
+        <th>Alias</th>
+        <th>Email Address</th>
+        <th>Poke History</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for people in pokes %}
+        <tr>
+            <td>{{ people.pokee.name }}</td>
+            <td>{{ people.pokee.alias }}</td>
+            <td>{{ people.pokee.email }}</td>
+            <td>{{ people.poke_count}}</td>
+            <td><form action="/add_poke/{{ people.pokee.id }}" method="post">
+                {% csrf_token %}
+                <input type="submit" name="poke" value="Poke!">
+            </form></td>
+        </tr>
+    {% endfor %}
+    {% for people in peoples %}
+        <tr>
+            <td>{{ people.name }}</td>
+            <td>{{ people.alias }}</td>
+            <td>{{ people.email }}</td>
+            <td>0</td>
+            <td><form action="/add_poke/{{ people.id }}" method="post">
+                {% csrf_token %}
+                <input type="submit" name="poke" value="Poke!">
+            </form></td>
+        </tr>
+    {% endfor %}
+</table>
+# if Poke.objects.filter(poker_id=user.id, pokee_id=id).exists():
+#     counter = Poke.objects.get(poker_id=user.id, pokee_id=id)
+#     counter.poke_count = F('poke_count') + 1
+#     counter.save()
+#     return redirect('/quotes')
+# else:
+#     Poke.objects.create(poker_id=user.id, poke_count=1, pokee_id=id)

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="">
+    <title>travels</title>
+    <style>
+        .leftside {
+            vertical-align: top;
+            display: inline-block;
+            width: 43%;
+        }
+        .rightside {
+            display: inline-block;
+            width: 43%;
+        }
+        .quote {
+            border: solid black 1px;
+            height: 90px;
+            width: 150px;
+            font-size: 10px;
+        }
+        .favquote {
+            border: solid black 1px;
+            height: 90px;
+            width: 150px;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="leftside">
+    <h1>Welcome {{ user.name }}</h1>
+
+    <h4>Quotable Quotes</h4>
+    {% for quote in quotes %}
+        <div class="quote">
+        <p>{{ quote.author }}: {{ quote.quote }}</p>
+            <p>posted by: <a href="/users/{{ quote.poster.id }}">{{ quote.poster.name }}</a></p>
+        <form action="add_fav/{{ quote.id }}" method="post">
+            {% csrf_token %}
+            <input type="submit" value="Add To My List">
+        </form>
+    </div>
+    {% endfor %}
+
+</div>
+<div class="rightside">
+<a href="/log_out">Logout</a>
+    <h4>Your favorites</h4>
+    {% for fav in favs %}
+    <div class="favquote">
+        <p>{{ fav.author }}: {{ fav.quote }}</p>
+        <p>posted by: <a href="/users/{{ fav.poster.id }}">{{ fav.poster.name }}</a></p>
+        <form action="rem_fav/{{ fav.id }}" method="post">
+            {% csrf_token %}
+            <input type="submit" value="Remove From My List">
+        </form>
+    </div>
+    {% endfor %}
+    {% if messages %}
+        {% for message in messages %}
+        <h3>{{ message }}</h3>
+        {% endfor %}
+    {% endif %}
+    <h5>Contribute a Quote:</h5>
+    <form action="/addquote" method="post">
+        {% csrf_token %}
+        <input type="text" name="author" placeholder="Quoted by:">
+        <br>
+        <br>
+        <textarea name="quote" placeholder="Message:"></textarea>
+        <input type="submit" name="Submit">
+    </form>
+</div>
+</body>
+</html>

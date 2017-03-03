@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from django.forms import extras
 from django.db import models
 from time import time, strftime, localtime
+from datetime import datetime
 import re, bcrypt
 EMAIL_REGEX = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 PASSWORD_REGEX = re.compile(r'((?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,})', re.MULTILINE)
@@ -37,8 +38,8 @@ class Umanager(models.Manager):
         if not password == confirm:
             msg.append('Must match password')
         if not re.search(r'^[0-9][0-9][0-9][0-9][\-][0-9][0-9][\-][0-9][0-9]', bday):
-            msg.append('Invalid birthday format. Format should be dd/mm/yyyy.')
-        elif bday > strftime('%d-%m-%Y'):
+            msg.append('Invalid birthday format. Format should be mm/dd/yyyy.')
+        elif bday > strftime('%Y-%m-%d'):
             msg.append("That date hasn't happened yet")
         if not msg:
             valid = True
@@ -80,12 +81,39 @@ class User(models.Model):
     password = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    bday = models.DateTimeField(auto_now=False, auto_now_add=False, default="9999-11-29")
+    bday = models.DateTimeField(auto_now=False, auto_now_add=False)
     objects = Umanager()
 
 
-class Poke(models.Model):
-    poker = models.ForeignKey(User, related_name='did_poke')
-    poke_count = models.IntegerField(null=True, blank=True)
-    pokee = models.ForeignKey(User, related_name='was_poked')
+class Quote(models.Model):
+    quote = models.TextField(max_length=100)
+    author = models.CharField(max_length=45)
+    poster = models.ForeignKey(User, related_name='who_post')
 
+
+class Favorite(models.Model):
+    fav_user = models.ForeignKey(User, related_name='user_fav', null=True, blank=True)
+    fav_quote = models.ForeignKey(Quote, related_name='quote_fav', null=True, blank=True)
+
+
+class AddQuote(object):
+    def __init__(self):
+        self.quote_errors = []
+        self.is_valid = True
+
+    def validate_quote(self, data):
+        if len(data['author']) < 4 and len(data['quote']) < 11:
+            self.quote_errors.append("Authors must be at least 3 characters")
+            self.quote_errors.append("You have at least 10 characters per quote")
+            self.is_valid = False
+        elif len(data['author']) < 4:
+            self.quote_errors.append("Authors must be at least 3 characters")
+            self.is_valid = False
+        elif len(data['quote']) < 11:
+            self.quote_errors.append("You have at least 10 characters per quote")
+            self.is_valid = False
+
+    def add_quote(self, data, user):
+        self.validate_quote(data)
+        if self.is_valid:
+            Quote.objects.create(quote=data['quote'], author=data['author'], poster=user)
